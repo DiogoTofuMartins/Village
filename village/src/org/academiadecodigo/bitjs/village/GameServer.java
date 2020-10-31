@@ -81,7 +81,7 @@ public class GameServer {
 
 
 
-    public synchronized void broadcast(String string) throws IOException {
+    public synchronized void broadcast(String string){
 
         for (Dispatcher player : dispatchersList) {
             player.sendUser(string);
@@ -116,7 +116,7 @@ public class GameServer {
         return playersNames;
     }
 
-    public synchronized void whisper(String username, String itself, String string) throws IOException {
+    public synchronized void whisper(String username, String itself, String string) {
 
         for (Dispatcher player : dispatchersList) {
             if (player.toString().equals(username)) {
@@ -125,7 +125,8 @@ public class GameServer {
         }
     }
 
-    public synchronized boolean checkUsername(String string) throws IOException {
+    public synchronized boolean checkUsername(String string) {
+
         for (Dispatcher player : dispatchersList) {
             if (player.toString().equals(string)) {
 

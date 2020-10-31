@@ -15,6 +15,7 @@ public class Dispatcher implements Runnable{
     private GameServer gameServer;
     private String userName;
     private Prompt prompt;
+    private boolean dead;
 
     public Dispatcher(Socket socket, GameServer gameServer){
         this.clientSocket = socket;
@@ -56,9 +57,9 @@ public class Dispatcher implements Runnable{
             }
         }
 
-        while (!isDead){
+        while (!isDead()){
 
-            character.runNightlogic
+            character.runNightlogic();
         }
 
 
@@ -68,7 +69,7 @@ public class Dispatcher implements Runnable{
 
     public void enterLobbyChat(){
         String actualMessage;
-        while (!gameServer.isPlaying) {
+        while (true) {
             synchronized (this) {
 
                 actualMessage = prompt.getUserInput();
@@ -91,10 +92,12 @@ public class Dispatcher implements Runnable{
 
 
                         case "/whisper":
-                            String user = askUser("who do you want to send the secret message");
-                            if (server.testValidUser(user)){
-                                String secretMessage = askUser("What is the message ?");
-                                server.sendParticularUser(secretMessage,user,userName);
+                            prompt.sendUserMsg("who do you want to send the secret message");
+                            String user = prompt.getUserInput();
+                            if (!gameServer.checkUsername(user)){
+                                prompt.sendUserMsg("What is the message ?");
+                                String secretMessage = prompt.getUserInput();
+                                gameServer.whisper(user , userName , secretMessage);
                                 break;
 
                             }
@@ -103,7 +106,7 @@ public class Dispatcher implements Runnable{
 
                         case "/play":
                             gameServer.broadcast(userName + " is ready to play");
-                            gameServer.atributeMyCharacter();
+                            gameServer.attributeMyCharacter(this);
                             return;
 
                         default:
@@ -112,7 +115,7 @@ public class Dispatcher implements Runnable{
                     continue;
                 }
 
-                server.broadcast(actualMessage, this);
+                gameServer.broadcast(actualMessage, this);
 
 
             }
@@ -138,6 +141,8 @@ public class Dispatcher implements Runnable{
         return userName;
     }
 
-
+    public boolean isDead() {
+        return dead;
+    }
 }
 
