@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
 
 public class GameServer {
 
-    public final int PORT = 7058;
+    public final int PORT = 7057;
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private List<Character> charactersList;
@@ -71,10 +71,11 @@ public class GameServer {
             counter++;
             prompt.sendUserMsg("waiting for players, please stand by...");
 
-            Dispatcher dispatcher = new Dispatcher(clientSocket, this)
-            executorService.submit(dispatcher);
+            Dispatcher dispatcher = new Dispatcher(clientSocket, this);
             dispatchersList.add(dispatcher);
-            if (counter == 10) {
+            executorService.submit(dispatcher);
+
+            if (counter == 3) {
                 charactersList = CharacterFactory.getList(counter);
                 full = true;
             }
@@ -83,6 +84,7 @@ public class GameServer {
             e.printStackTrace();
         }
     }
+
 
 
     public synchronized void broadcast(String string, Dispatcher dispatcher) {
@@ -118,7 +120,7 @@ public class GameServer {
 
     public synchronized String[] listUsers(String userName) {
 
-        String[] playersNames = new String[dispatchersList.size()];
+        String[] playersNames = new String[dispatchersList.size() - 1];
 
         for (int i = 0; i < dispatchersList.size(); i++) {
             if (dispatchersList.get(i).toString().equals(userName)) {
@@ -140,16 +142,17 @@ public class GameServer {
         }
     }
 
-    public synchronized boolean checkUsername(String string) {
-        for (Dispatcher player : dispatchersList) {
-            if (player.toString().equals(string)) {
-
-                return false;
-
+    public synchronized boolean checkUsername(String userName) {
+        boolean isValidUsername = true;
+        for (int i = 0; i < dispatchersList.size(); i++) {
+            if (userName.equals(dispatchersList.get(i).toString())) {
+                isValidUsername = false;
+                break;
             }
         }
-        return true;
+        return isValidUsername;
     }
+
 
     public synchronized void attributeMyCharacter(Dispatcher dispatcher) {
 
@@ -193,7 +196,7 @@ public class GameServer {
     }
 
     public synchronized void checkPolls(String vote, String voter) {
-
+        broadcast(voter + "voted in " + vote);
         totalVotes++;
         for (Dispatcher dispatcher : dispatchersList) {
             if (vote.equals(dispatcher.toString())) {
@@ -205,7 +208,7 @@ public class GameServer {
 
             for (Dispatcher dispatcher : dispatchersList) {
                 if (dispatcher.getVotes() >= (dispatchersList.size() / 2)) {
-                    dispatcher.setDead(true);
+                    dispatcher.setDead();
                     dispatchersList.remove(dispatcher);
                     broadcast(dispatcher.toString() + "was lynched. His role was " +
                              dispatcher.getCharacter().toString());
@@ -219,10 +222,15 @@ public class GameServer {
 
         }
 
+        public void addSleeper(){
+
+
 
     }
 
-
+    public boolean isFull() {
+        return full;
+    }
 }
 
 

@@ -1,6 +1,8 @@
 package org.academiadecodigo.bitjs.village.characters;
 
+
 import org.academiadecodigo.bitjs.village.Dispatcher;
+
 import org.academiadecodigo.bitjs.village.GameServer;
 import org.academiadecodigo.bootcamp.Prompt;
 import org.academiadecodigo.bootcamp.scanners.menu.MenuInputScanner;
@@ -15,11 +17,14 @@ public class Psychic extends Character{
 
         int response = prompt.getUserInput(menuPsychic);
 
+
         String player = gameServer.listUsers(dispatcher.toString())[response - 1];
 
         gameServer.tryToKillPlayer(player);
 
+
     }
+
 
 
 }

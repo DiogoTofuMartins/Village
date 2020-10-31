@@ -1,5 +1,4 @@
 package org.academiadecodigo.bitjs.village.characters;
-
 import org.academiadecodigo.bitjs.village.Dispatcher;
 import org.academiadecodigo.bitjs.village.GameServer;
 import org.academiadecodigo.bootcamp.Prompt;
