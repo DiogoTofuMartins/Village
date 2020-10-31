@@ -1,11 +1,16 @@
 package org.academiadecodigo.bitjs.village.characters;
 
+import org.academiadecodigo.bitjs.village.GameServer;
 import org.academiadecodigo.bootcamp.Prompt;
 
-public abstract class Character {
+public class Character {
 
-    abstract void runNightLogic();
+    public void runNightLogic(Prompt prompt){
 
-    abstract void runDayLogic();
+    }
+
+    public void runDayLogic(GameServer gameServer, Prompt prompt){
+
+    }
 
 }

@@ -6,12 +6,9 @@ public class Priest extends Character{
 
 
     @Override
-    void runNightLogic() {
+    public void runNightLogic(Prompt prompt) {
 
     }
 
-    @Override
-    void runDayLogic() {
 
-    }
 }
