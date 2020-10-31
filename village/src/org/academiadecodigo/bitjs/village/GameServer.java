@@ -1,7 +1,9 @@
 package org.academiadecodigo.bitjs.village;
+
 import org.academiadecodigo.bitjs.village.characters.Character;
 import org.academiadecodigo.bitjs.village.characters.CharacterFactory;
 import org.academiadecodigo.bootcamp.Prompt;
+
 import javax.xml.stream.events.Characters;
 import java.io.*;
 import java.net.ServerSocket;
@@ -25,6 +27,9 @@ public class GameServer {
     private List<Dispatcher> dispatchersList;
     private int counter;
     private boolean full;
+    private String playerToSave;
+    private String playerToKill;
+    private int totalVotes;
 
 
     public GameServer() {
@@ -59,7 +64,7 @@ public class GameServer {
             System.out.println("Accepted");
 
             prompt = new Prompt(clientSocket.getInputStream(), new PrintStream(clientSocket.getOutputStream()));
-            if(full){
+            if (full) {
                 prompt.sendUserMsg("game full, try again later!");
                 return;
             }
@@ -69,7 +74,7 @@ public class GameServer {
             Dispatcher dispatcher = new Dispatcher(clientSocket, this)
             executorService.submit(dispatcher);
             dispatchersList.add(dispatcher);
-            if(counter == 10){
+            if (counter == 10) {
                 charactersList = CharacterFactory.getList(counter);
                 full = true;
             }
@@ -80,16 +85,23 @@ public class GameServer {
     }
 
 
-
     public synchronized void broadcast(String string, Dispatcher dispatcher) {
 
         for (Dispatcher player : dispatchersList) {
-            if(player.toString().equals(dispatcher.toString())){
+            if (player.toString().equals(dispatcher.toString())) {
                 continue;
             }
             player.sendUser(string);
         }
     }
+    public synchronized void broadcast(String string) {
+
+        for (Dispatcher player : dispatchersList) {
+
+            player.sendUser(string);
+        }
+    }
+
 
     public synchronized String[] listUsers() {
 
@@ -110,7 +122,7 @@ public class GameServer {
 
         for (int i = 0; i < dispatchersList.size(); i++) {
             if (dispatchersList.get(i).toString().equals(userName)) {
-               continue;
+                continue;
             }
             playersNames[i] = dispatchersList.get(i).toString();
 
@@ -128,7 +140,7 @@ public class GameServer {
         }
     }
 
-    public synchronized boolean checkUsername(String string){
+    public synchronized boolean checkUsername(String string) {
         for (Dispatcher player : dispatchersList) {
             if (player.toString().equals(string)) {
 
@@ -142,13 +154,73 @@ public class GameServer {
     public synchronized void attributeMyCharacter(Dispatcher dispatcher) {
 
 
-            int random = (int) (Math.random() * charactersList.size());
-            Character characterToReturn = charactersList.get(random);
-            charactersList.remove(random);
-            characterAttributed = true;
-            dispatcher.setCharacter(characterToReturn);
+        int random = (int) (Math.random() * charactersList.size());
+        Character characterToReturn = charactersList.get(random);
+        charactersList.remove(random);
+        characterAttributed = true;
+        dispatcher.setCharacter(characterToReturn);
+
+    }
+
+    public synchronized void savePlayer(String player) {
+
+        for (Dispatcher username : dispatchersList) {
+
+            if (player.equals(username.toString())) {
+                this.playerToSave = player;
+            }
 
         }
+
+    }
+
+    public synchronized void tryToKillPlayer(String player) {
+
+        for (Dispatcher username : dispatchersList) {
+
+            if (player.equals(username.toString())) {
+                this.playerToKill = player;
+            }
+
+        }
+
+    }
+
+    public synchronized boolean checkKill() {
+
+        return playerToKill.equals(playerToSave);
+
+    }
+
+    public synchronized void checkPolls(String vote, String voter) {
+
+        totalVotes++;
+        for (Dispatcher dispatcher : dispatchersList) {
+            if (vote.equals(dispatcher.toString())) {
+                dispatcher.setVotes(dispatcher.getVotes() + 1);
+            }
+        }
+
+        if (totalVotes == dispatchersList.size()) {
+
+            for (Dispatcher dispatcher : dispatchersList) {
+                if (dispatcher.getVotes() >= (dispatchersList.size() / 2)) {
+                    dispatcher.setDead(true);
+                    dispatchersList.remove(dispatcher);
+                    broadcast(dispatcher.toString() + "was lynched. His role was " +
+                             dispatcher.getCharacter().toString());
+                    break;
+                }
+
+            }
+            for (Dispatcher dispatcher : dispatchersList)
+                dispatcher.setVotes(0);
+        }
+
+        }
+
+
+    }
 
 
 }

@@ -15,6 +15,8 @@ public class Dispatcher implements Runnable{
     private GameServer gameServer;
     private String userName;
     private Prompt prompt;
+    private int votes;
+
 
     public Dispatcher(Socket socket, GameServer gameServer){
         this.clientSocket = socket;
@@ -133,10 +135,20 @@ public class Dispatcher implements Runnable{
 
     }
 
+    public void setVotes(int votes) {
+        this.votes = votes;
+    }
+
+    public int getVotes() {
+        return votes;
+    }
+
     @Override
     public String toString() {
         return userName;
     }
+
+
 
 
 }
