@@ -1,7 +1,8 @@
 package org.academiadecodigo.bitjs.village.characters;
 
-public class Werewolf extends Character {
+import org.academiadecodigo.bootcamp.Prompt;
 
+public class Werewolf extends Character {
 
     @Override
     void runNightLogic() {
@@ -10,6 +11,6 @@ public class Werewolf extends Character {
 
     @Override
     void runDayLogic() {
-        gameServer.broadcast();
+
     }
 }

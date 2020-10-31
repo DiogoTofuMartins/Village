@@ -42,6 +42,7 @@ public class Dispatcher implements Runnable{
         character.start();
         character.runNightLogic
 
+
     }
 
     @Override
