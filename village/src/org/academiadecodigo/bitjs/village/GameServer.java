@@ -66,7 +66,7 @@ public class GameServer {
             counter++;
             prompt.sendUserMsg("waiting for players, please stand by...");
 
-            Dispatcher dispatcher = new Dispatcher(clientSocket, this)
+            Dispatcher dispatcher = new Dispatcher(clientSocket, this);
             executorService.submit(dispatcher);
             dispatchersList.add(dispatcher);
             if(counter == 10){
@@ -81,9 +81,14 @@ public class GameServer {
 
 
 
-    public synchronized void broadcast(String string){
+
+    public synchronized void broadcast(String string, Dispatcher dispatcher){
+
 
         for (Dispatcher player : dispatchersList) {
+            if(player.toString().equals(dispatcher.toString())){
+                continue;
+            }
             player.sendUser(string);
         }
     }
@@ -125,7 +130,7 @@ public class GameServer {
         }
     }
 
-    public synchronized boolean checkUsername(String string) {
+    public synchronized boolean checkUsername(String string){
 
         for (Dispatcher player : dispatchersList) {
             if (player.toString().equals(string)) {

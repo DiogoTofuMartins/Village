@@ -1,17 +1,15 @@
 package org.academiadecodigo.bitjs.village.characters;
 
+import org.academiadecodigo.bitjs.village.GameServer;
 import org.academiadecodigo.bootcamp.Prompt;
 
 public class Priest extends Character{
 
 
     @Override
-    void runNightLogic() {
+    public void runNightLogic(Prompt prompt, GameServer gameServer) {
 
     }
 
-    @Override
-    void runDayLogic() {
 
-    }
 }

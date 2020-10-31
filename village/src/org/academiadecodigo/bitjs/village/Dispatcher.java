@@ -59,7 +59,15 @@ public class Dispatcher implements Runnable{
 
         while (!isDead()){
 
-            character.runNightlogic();
+            character.runNightLogic(gameServer,);
+            synchronized (gameServer) {
+                wait();
+            }
+            if(isDead()){ break;}
+            character.runDayLogic();
+            synchronized (gameServer) {
+                wait();
+            }
         }
 
 
@@ -74,9 +82,9 @@ public class Dispatcher implements Runnable{
 
                 actualMessage = prompt.getUserInput();
                 boolean isCommand = false;
-                for (int i = 0; i < Commands.values().length; i++) {
+                for (int i = 0; i < CommandsLobby.values().length; i++) {
 
-                    if (actualMessage.equals(Commands.values()[i].getCommandMessage())) {
+                    if (actualMessage.equals(CommandsLobby.values()[i].getCommandMessage())) {
                         isCommand = true;
                     }
                 }
@@ -105,7 +113,7 @@ public class Dispatcher implements Runnable{
                             break;
 
                         case "/play":
-                            gameServer.broadcast(userName + " is ready to play");
+                            gameServer.broadcast(userName + " is ready to play",this);
                             gameServer.attributeMyCharacter(this);
                             return;
 
