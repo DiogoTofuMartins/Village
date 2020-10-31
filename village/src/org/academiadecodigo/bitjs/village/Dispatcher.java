@@ -84,6 +84,7 @@ public class Dispatcher implements Runnable{
 
                     switch (actualMessage) {
 
+
                         case "/list":
                             gameServer.listUsers();
                             break;
@@ -129,6 +130,7 @@ public class Dispatcher implements Runnable{
     public void setCharacter(Character character) {
         this.character = character;
         prompt.sendUserMsg("you are "+ character.toString());
+
     }
 
     @Override

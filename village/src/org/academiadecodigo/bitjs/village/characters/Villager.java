@@ -1,4 +1,17 @@
 package org.academiadecodigo.bitjs.village.characters;
 
-public class Villager {
+import org.academiadecodigo.bootcamp.Prompt;
+
+public class Villager extends Character{
+
+
+    @Override
+    void runNightLogic() {
+
+    }
+
+    @Override
+    void runDayLogic() {
+
+    }
 }

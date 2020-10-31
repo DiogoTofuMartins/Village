@@ -1,4 +1,16 @@
 package org.academiadecodigo.bitjs.village.characters;
 
-public class Psychic {
+import org.academiadecodigo.bootcamp.Prompt;
+
+public class Psychic extends Character{
+
+    @Override
+    void runNightLogic() {
+
+    }
+
+    @Override
+    void runDayLogic() {
+
+    }
 }
