@@ -67,13 +67,16 @@ public class Dispatcher implements Runnable {
         while (!isDead()) {
             System.out.println(Thread.currentThread().getName() + "is not dead");
             character.runNightLogic(prompt, this);
+            System.out.println("left night logic");
            /* synchronized (gameServer) {
                try {
                     wait();
-*/          notifyAll();
+*/
+
             if (isDead()) {
                 break;
             }
+            System.out.println("arriving day logic");
             character.runDayLogic(prompt, this);
                  /*  synchronized (gameServer) {
                         wait();
@@ -81,7 +84,7 @@ public class Dispatcher implements Runnable {
                 } catch(InterruptedException e){
                         e.printStackTrace();
                     }*/
-            notifyAll();
+
         }
     }
 
@@ -129,9 +132,12 @@ public class Dispatcher implements Runnable {
                         break;
 
                     case "/play":
-                        GameServer.instanceOf().broadcast(userName + " is ready to play", this);
-                        GameServer.instanceOf().attributeMyCharacter(this);
-                        character.runNightLogic(prompt,this);
+                        if(GameServer.instanceOf().getCounter() == 5) {
+                            GameServer.instanceOf().broadcast(userName + " is ready to play", this);
+                            GameServer.instanceOf().attributeMyCharacter(this);
+                            //character.runNightLogic(prompt, this);
+                            return;
+                        }
                         break;
 
                     default:
@@ -145,6 +151,7 @@ public class Dispatcher implements Runnable {
 
 
         }
+
     }
 
 

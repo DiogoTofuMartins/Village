@@ -196,7 +196,8 @@ public class GameServer {
 
     public synchronized boolean checkKill() {
 
-        return playerToKill.equals(playerToSave);
+        return !playerToKill.equals(playerToSave);
+
 
     }
 
@@ -215,6 +216,7 @@ public class GameServer {
                 if (dispatcher.getVotes() >= (dispatchersList.size() / 2)) {
                     dispatcher.setDead();
                     dispatchersList.remove(dispatcher);
+
                     broadcast(dispatcher.toString() + "was lynched. His role was " +
                              dispatcher.getCharacter().toString());
                     break;
@@ -231,16 +233,11 @@ public class GameServer {
 
         public void addSleeper(){
 
-
-
     }
 
-    public List<Dispatcher> getDispatchersList() {
-        return dispatchersList;
-    }
 
-    public boolean isFull() {
-        return full;
+    public int getCounter() {
+        return counter;
     }
 }
 

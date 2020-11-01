@@ -29,7 +29,7 @@ public class Psychic extends Character {
         int response = prompt.getUserInput(menuPsychic);
 
 
-        String player = GameServer.instanceOf().listUsers(dispatcher.toString())[response - 1];
+        String player = excludeUser[response - 1];
 
         GameServer.instanceOf().tryToKillPlayer(player);
 

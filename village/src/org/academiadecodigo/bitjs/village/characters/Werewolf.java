@@ -27,7 +27,7 @@ public class Werewolf extends Character {
 
         int response = prompt.getUserInput(menuWerewolf);
 
-        String player = GameServer.instanceOf().listUsers(dispatcher.toString())[response - 1];
+        String player = excludeUser[response - 1];
 
         GameServer.instanceOf().tryToKillPlayer(player);
     }

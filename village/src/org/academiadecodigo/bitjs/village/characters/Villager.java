@@ -10,6 +10,7 @@ public class Villager extends Character{
     public void runNightLogic(Prompt prompt, Dispatcher dispatcher) {
 
         prompt.sendUserMsg("What a beautiful night. I should get some sleep.");
+        return;
 
 
     }
