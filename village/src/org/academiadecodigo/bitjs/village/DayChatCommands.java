@@ -4,18 +4,17 @@ public enum DayChatCommands {
 
     VOTE("/vote"),
     WHISPER("/whisper"),
-    LIST("/list"),
-    SLEEP("/sleep");
+    LIST("/list");
 
     private String commandMessage;
 
-    private DayChatCommands(String commandMessage) {
+    DayChatCommands(String commandMessage) {
 
-        this.commandMessage=commandMessage;
+        this.commandMessage = commandMessage;
 
     }
 
     public String getCommandMessage() {
         return commandMessage;
     }
-}
+    }

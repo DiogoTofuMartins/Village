@@ -4,7 +4,6 @@ import org.academiadecodigo.bitjs.village.characters.Character;
 import org.academiadecodigo.bitjs.village.utili.StringHelper;
 import org.academiadecodigo.bootcamp.Prompt;
 import org.academiadecodigo.bootcamp.scanners.string.StringInputScanner;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
@@ -19,11 +18,9 @@ public class Dispatcher implements Runnable {
     private boolean dead;
 
 
-
     public Dispatcher(Socket socket) {
+
         this.clientSocket = socket;
-
-
 
         try {
             this.prompt = new Prompt(socket.getInputStream(), new PrintStream(socket.getOutputStream()));
@@ -38,7 +35,6 @@ public class Dispatcher implements Runnable {
         StringInputScanner usernameQuestion = new StringInputScanner();
         usernameQuestion.setMessage("What is your username?");
 
-
         while (userName == null) {
 
             String triedUserName;
@@ -51,20 +47,22 @@ public class Dispatcher implements Runnable {
             }
             prompt.sendUserMsg("i don't like that Username , it is already in use pick another");
         }
-        while (!GameServer.instanceOf().allHaveUsername()){
+
+        while (!GameServer.instanceOf().allHaveUsername()) {
 
             addDelay(100);
         }
+
         enterLobbyChat();
         prompt.sendUserMsg("\033[H\033[2J");
         prompt.sendUserMsg("WAITING FOR OTHER PLAYERS TO PRESS PLAY.");
+
         while (!GameServer.instanceOf().isAllCharacterAttributed()) {
 
             addDelay(100);
         }
 
         addDelay(5000);
-        // prompt.sendUserMsg("\033[H\033[2J");
 
         while (!isDead()) {
 
@@ -73,14 +71,17 @@ public class Dispatcher implements Runnable {
             prompt.sendUserMsg(StringHelper.NIGHT);
             character.runNightLogic(prompt, this);
             GameServer.instanceOf().addPlayersWhoLeftNight();
-            while(!GameServer.instanceOf().didAllLeftNightLogic()){
+
+            while (!GameServer.instanceOf().didAllLeftNightLogic()) {
                 GameServer.instanceOf().allLeftNightLogic();
                 addDelay(100);
             }
+
             GameServer.instanceOf().resetVotingStarted();
             GameServer.instanceOf().resetVotingEnded();
 
-            if(GameServer.instanceOf().checkEndGame(this)){
+            if (GameServer.instanceOf().checkEndGame(this)) {
+
                 try {
                     clientSocket.close();
                 } catch (IOException e) {
@@ -95,15 +96,20 @@ public class Dispatcher implements Runnable {
 
             prompt.sendUserMsg(StringHelper.SUNSET);
 
-
             character.runDayLogic(prompt, this);
 
             GameServer.instanceOf().resetAllLeftNight();
-            while (!GameServer.instanceOf().isVotingEnded()){
+
+            while (!GameServer.instanceOf().isVotingEnded()) {
                 addDelay(100);
             }
-            prompt.sendUserMsg("\033[H\033[2J");
-            if(GameServer.instanceOf().checkEndGame(this)){
+
+            if(!isDead()) {
+                prompt.sendUserMsg("\033[H\033[2J");
+            }
+
+            if (GameServer.instanceOf().checkEndGame(this)) {
+
                 try {
                     clientSocket.close();
                 } catch (IOException e) {
@@ -112,18 +118,14 @@ public class Dispatcher implements Runnable {
                 return;
             }
         }
+
         try {
             clientSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-
-
     }
-
-
-    //TODO Use StringHelper in all hardcoded strings
 
     public void enterLobbyChat() {
 
@@ -131,88 +133,85 @@ public class Dispatcher implements Runnable {
         System.out.println("entered lobby chat");
         prompt.sendUserMsg(StringHelper.LOGO);
         prompt.sendUserMsg(StringHelper.INSTRUCTIONS);
-        String actualMessage=null;
+        String actualMessage = null;
 
         boolean isCommand = false;
         while (true) {
 
-
             actualMessage = prompt.getUserInput();
-            if (actualMessage.equals("")||actualMessage.equals(null)){
+            if (actualMessage.equals("") || actualMessage.equals(null)) {
                 continue;
             }
+
             for (int i = 0; i < CommandsLobby.values().length; i++) {
 
                 if (actualMessage.equals(CommandsLobby.values()[i].getCommandMessage())) {
                     isCommand = true;
                 }
             }
-            if (isCommand) {
 
+            if (isCommand) {
 
                 switch (actualMessage) {
 
-
                     case "/list":
+
                         String list = "";
-                        for(String name : GameServer.instanceOf().listUsers()){
+                        for (String name : GameServer.instanceOf().listUsers()) {
                             list += name + "\n";
                         }
                         prompt.sendUserMsg(list);
-                        notifyAll();
                         break;
 
-
                     case "/whisper":
+
                         prompt.sendUserMsg(StringHelper.WHISPER);
                         String user = prompt.getUserInput();
+
                         if (!GameServer.instanceOf().checkUsername(user)) {
                             prompt.sendUserMsg(StringHelper.MESSAGE);
                             String secretMessage = prompt.getUserInput();
                             GameServer.instanceOf().whisper(user, userName, secretMessage);
-                            notifyAll();
                             break;
 
                         }
+
                         sendUser(StringHelper.USER);
                         break;
 
                     case "/play":
 
-                        System.out.println(GameServer.instanceOf().getStartCounter());
-
                         if (GameServer.instanceOf().getStartCounter() == GameServer.instanceOf().N_PLAYERS) {
                             GameServer.instanceOf().broadcast(userName + " is ready to play", this);
                             GameServer.instanceOf().attributeMyCharacter(this);
 
-                            isCommand=false;
+                            isCommand = false;
                             return;
                         }
                         break;
 
                     default:
-                        System.out.println("this is super weird");
+
                         break;
                 }
-                isCommand= false;
+
+                isCommand = false;
                 continue;
             }
 
-
             GameServer.instanceOf().broadcast(actualMessage, this);
-
 
         }
     }
 
 
     public void addDelay(int milliseconds) {
+
         try {
             Thread.sleep(milliseconds);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
 
     public void sendUser(String message) {
@@ -220,11 +219,11 @@ public class Dispatcher implements Runnable {
     }
 
     public void setCharacter(Character character) {
+
         this.character = character;
         prompt.sendUserMsg(character.toString());
 
     }
-
 
     public void setVotes(int votes) {
         this.votes = votes;

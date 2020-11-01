@@ -11,27 +11,29 @@ public class Character {
 
     public void runNightLogic(Prompt prompt, Dispatcher dispatcher) {
 
-
     }
 
     public void runDayLogic(Prompt prompt, Dispatcher userDispatcher) {
+
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        prompt.sendUserMsg("\033[H\033[2J");
 
+        prompt.sendUserMsg("\033[H\033[2J");
         prompt.sendUserMsg(StringHelper.DAY);
         String actualMessage;
         boolean voted = false;
+
         while (!userDispatcher.isDead()) {
 
-            System.out.println("getting input");
             actualMessage = prompt.getUserInput();
+
             if (actualMessage.equals("")||actualMessage.equals(null)){
                 continue;
             }
+
             boolean isCommand = false;
             for (int i = 0; i < DayChatCommands.values().length; i++) {
 
@@ -39,61 +41,63 @@ public class Character {
                     isCommand = true;
                 }
             }
+
             if (isCommand) {
 
 
                 switch (actualMessage) {
 
-
                     case "/list":
+
                         String list = "";
+
                         for(String name : GameServer.instanceOf().listUsers()){
                             list += name + "\n";
                         }
+
                         prompt.sendUserMsg(list);
                         break;
-
 
                     case "/whisper":
 
                         prompt.sendUserMsg(StringHelper.WHISPER);
                         String user = prompt.getUserInput();
+
                         if (!GameServer.instanceOf().checkUsername(user)) {
                             prompt.sendUserMsg(StringHelper.MESSAGE);
                             String secretMessage = prompt.getUserInput();
                             GameServer.instanceOf().whisper(user, userDispatcher.toString(), secretMessage);
                             break;
-
                         }
+
                         prompt.sendUserMsg(StringHelper.USER);
                         break;
 
                     case "/vote":
+
                         prompt.sendUserMsg("\033[H\033[2J");
                         GameServer.instanceOf().addVotersReady();
                         GameServer.instanceOf().broadcast(userDispatcher.toString()+ " is ready to vote hurry up");
+
                         while (!GameServer.instanceOf().isVotingStarted()){
                             GameServer.instanceOf().checkVotingStarted();
                             userDispatcher.addDelay(100);
                         }
+
                         runVotingLogic(GameServer.instanceOf(), userDispatcher.toString(), prompt);
                         return;
 
                     default:
-                        System.out.println("this is super weird");
                 }
                 continue;
             }
-            System.out.println("doing your broadcast");
+
             GameServer.instanceOf().broadcast(actualMessage, userDispatcher);
-
-
         }
-
     }
 
-
     public void runVotingLogic(GameServer gameServer, String username, Prompt prompt) {
+
         String[] names = GameServer.instanceOf().listUsers();
         String[] excludeUser = new String[names.length - 1];
         int j = 0;
@@ -103,18 +107,15 @@ public class Character {
                 excludeUser[j] = names[i];
                 j++;
             }
-
         }
-        MenuInputScanner voteMenu = new MenuInputScanner(excludeUser);
 
+        MenuInputScanner voteMenu = new MenuInputScanner(excludeUser);
 
         voteMenu.setMessage(StringHelper.VOTING);
 
         int voteIndex = prompt.getUserInput(voteMenu) - 1;
-        String votedPlayer = gameServer.listUsers()[voteIndex];
+        String votedPlayer = excludeUser[voteIndex];
         GameServer.instanceOf().addTotalVotes();
         gameServer.checkPolls(votedPlayer, username);
-
     }
-
 }

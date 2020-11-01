@@ -1,6 +1,5 @@
 package org.academiadecodigo.bitjs.village.characters;
 
-
 import org.academiadecodigo.bitjs.village.Dispatcher;
 import org.academiadecodigo.bitjs.village.GameServer;
 import org.academiadecodigo.bitjs.village.utili.StringHelper;
@@ -13,6 +12,7 @@ public class Werewolf extends Character {
     public void runNightLogic(Prompt prompt, Dispatcher dispatcher) {
 
         String[] names = GameServer.instanceOf().listUsers();
+
         String[] excludeUser = new String[names.length - 1];
         int j = 0;
 
@@ -21,8 +21,8 @@ public class Werewolf extends Character {
                 excludeUser[j] = names[i];
                 j++;
             }
-
         }
+
         MenuInputScanner menuWerewolf = new MenuInputScanner(excludeUser);
         menuWerewolf.setMessage(StringHelper.KILL);
 
@@ -31,6 +31,7 @@ public class Werewolf extends Character {
         String player = excludeUser[response - 1];
 
         GameServer.instanceOf().tryToKillPlayer(player);
+
     }
 
     @Override

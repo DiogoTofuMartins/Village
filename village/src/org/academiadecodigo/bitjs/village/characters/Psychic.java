@@ -1,8 +1,6 @@
 package org.academiadecodigo.bitjs.village.characters;
 
-
 import org.academiadecodigo.bitjs.village.Dispatcher;
-
 import org.academiadecodigo.bitjs.village.GameServer;
 import org.academiadecodigo.bitjs.village.utili.StringHelper;
 import org.academiadecodigo.bootcamp.Prompt;
@@ -14,10 +12,12 @@ public class Psychic extends Character {
     public void runNightLogic(Prompt prompt, Dispatcher dispatcher) {
 
         String[] names = GameServer.instanceOf().listUsers();
+
         String[] excludeUser = new String[names.length - 1];
         int j = 0;
 
         for (int i = 0; i < names.length; i++) {
+
             if (!names[i].equals(dispatcher.toString())) {
                 excludeUser[j] = names[i];
                 j++;
@@ -35,13 +35,7 @@ public class Psychic extends Character {
 
             prompt.sendUserMsg(StringHelper.GUESSRIGHT);
 
-
         }else {prompt.sendUserMsg(StringHelper.GUESSWRONG);}
-
-
-
-
-
 
     }
 

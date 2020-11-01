@@ -8,7 +8,7 @@ public enum CommandsLobby {
 
     private String commandMessage;
 
-    private CommandsLobby(String commandMessage) {
+    CommandsLobby(String commandMessage) {
 
         this.commandMessage=commandMessage;
 
