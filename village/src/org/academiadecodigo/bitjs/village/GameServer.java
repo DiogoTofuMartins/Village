@@ -84,6 +84,7 @@ public class GameServer {
             prompt = new Prompt(clientSocket.getInputStream(), new PrintStream(clientSocket.getOutputStream()));
             if (full) {
                 prompt.sendUserMsg("game full, try again later!");
+                clientSocket.close();
                 return;
             }
             startCounter++;

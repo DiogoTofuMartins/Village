@@ -34,7 +34,9 @@ public class Psychic extends Character {
 
             prompt.sendUserMsg("YOU FOUND THE WEREWOLF!");
 
+
         }else {prompt.sendUserMsg("YOUR GUESS WAS WRONG!");}
+
 
 
 
