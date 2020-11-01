@@ -34,7 +34,6 @@ public class Dispatcher implements Runnable {
 
     @Override
     public void run() {
-        System.out.println(Thread.currentThread().getName());
 
         StringInputScanner usernameQuestion = new StringInputScanner();
         usernameQuestion.setMessage("What is your username?");
@@ -57,15 +56,20 @@ public class Dispatcher implements Runnable {
             addDelay(100);
         }
         enterLobbyChat();
-        System.out.println("arrived waiting");
+        prompt.sendUserMsg("\033[H\033[2J");
+        prompt.sendUserMsg("WAITING FOR OTHER PLAYERS TO PRESS PLAY.");
         while (!GameServer.instanceOf().isAllCharacterAttributed()) {
 
             addDelay(100);
         }
 
-        System.out.println(Thread.currentThread().getName());
+        addDelay(5000);
+        // prompt.sendUserMsg("\033[H\033[2J");
 
         while (!isDead()) {
+
+            prompt.sendUserMsg("\033[H\033[2J");
+            sendUser(character.toString());
             prompt.sendUserMsg(StringHelper.NIGHT);
             character.runNightLogic(prompt, this);
             GameServer.instanceOf().addPlayersWhoLeftNight();
@@ -73,7 +77,9 @@ public class Dispatcher implements Runnable {
                 GameServer.instanceOf().allLeftNightLogic();
                 addDelay(100);
             }
-            addDelay(1000);
+            GameServer.instanceOf().resetVotingStarted();
+            GameServer.instanceOf().resetVotingEnded();
+
             if(GameServer.instanceOf().checkEndGame(this)){
                 try {
                     clientSocket.close();
@@ -83,18 +89,20 @@ public class Dispatcher implements Runnable {
                 return;
             }
 
-            GameServer.instanceOf().resetVotingEnded();
             if (isDead()) {
                 break;
             }
+
             prompt.sendUserMsg(StringHelper.SUNSET);
+
+
             character.runDayLogic(prompt, this);
 
             GameServer.instanceOf().resetAllLeftNight();
             while (!GameServer.instanceOf().isVotingEnded()){
                 addDelay(100);
             }
-
+            prompt.sendUserMsg("\033[H\033[2J");
             if(GameServer.instanceOf().checkEndGame(this)){
                 try {
                     clientSocket.close();
@@ -111,6 +119,7 @@ public class Dispatcher implements Runnable {
         }
 
 
+
     }
 
 
@@ -118,6 +127,7 @@ public class Dispatcher implements Runnable {
 
     public void enterLobbyChat() {
 
+        prompt.sendUserMsg("\033[H\033[2J");
         System.out.println("entered lobby chat");
         prompt.sendUserMsg(StringHelper.LOGO);
         prompt.sendUserMsg(StringHelper.INSTRUCTIONS);
@@ -144,7 +154,11 @@ public class Dispatcher implements Runnable {
 
 
                     case "/list":
-                        GameServer.instanceOf().listUsers();
+                        String list = "";
+                        for(String name : GameServer.instanceOf().listUsers()){
+                            list += name + "\n";
+                        }
+                        prompt.sendUserMsg(list);
                         notifyAll();
                         break;
 
@@ -164,9 +178,11 @@ public class Dispatcher implements Runnable {
                         break;
 
                     case "/play":
+
                         System.out.println(GameServer.instanceOf().getStartCounter());
-                        if (GameServer.instanceOf().getStartCounter() == 4) {
-                            GameServer.instanceOf().broadcast(userName + " is ready to play!", this);
+
+                        if (GameServer.instanceOf().getStartCounter() == GameServer.instanceOf().N_PLAYERS) {
+                            GameServer.instanceOf().broadcast(userName + " is ready to play", this);
                             GameServer.instanceOf().attributeMyCharacter(this);
 
                             isCommand=false;

@@ -15,6 +15,13 @@ public class Character {
     }
 
     public void runDayLogic(Prompt prompt, Dispatcher userDispatcher) {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        prompt.sendUserMsg("\033[H\033[2J");
+
         prompt.sendUserMsg(StringHelper.DAY);
         String actualMessage;
         boolean voted = false;
@@ -39,11 +46,16 @@ public class Character {
 
 
                     case "/list":
-                        GameServer.instanceOf().listUsers();
+                        String list = "";
+                        for(String name : GameServer.instanceOf().listUsers()){
+                            list += name + "\n";
+                        }
+                        prompt.sendUserMsg(list);
                         break;
 
 
                     case "/whisper":
+
                         prompt.sendUserMsg(StringHelper.WHISPER);
                         String user = prompt.getUserInput();
                         if (!GameServer.instanceOf().checkUsername(user)) {
@@ -57,7 +69,13 @@ public class Character {
                         break;
 
                     case "/vote":
-
+                        prompt.sendUserMsg("\033[H\033[2J");
+                        GameServer.instanceOf().addVotersReady();
+                        GameServer.instanceOf().broadcast(userDispatcher.toString()+ " is ready to vote hurry up");
+                        while (!GameServer.instanceOf().isVotingStarted()){
+                            GameServer.instanceOf().checkVotingStarted();
+                            userDispatcher.addDelay(100);
+                        }
                         runVotingLogic(GameServer.instanceOf(), userDispatcher.toString(), prompt);
                         return;
 
@@ -76,12 +94,25 @@ public class Character {
 
 
     public void runVotingLogic(GameServer gameServer, String username, Prompt prompt) {
+        String[] names = GameServer.instanceOf().listUsers();
+        String[] excludeUser = new String[names.length - 1];
+        int j = 0;
 
-        MenuInputScanner voteMenu = new MenuInputScanner(gameServer.listUsers());
+        for (int i = 0; i < names.length; i++) {
+            if (!names[i].equals(username)) {
+                excludeUser[j] = names[i];
+                j++;
+            }
+
+        }
+        MenuInputScanner voteMenu = new MenuInputScanner(excludeUser);
+
+
         voteMenu.setMessage(StringHelper.VOTING);
+
         int voteIndex = prompt.getUserInput(voteMenu) - 1;
         String votedPlayer = gameServer.listUsers()[voteIndex];
-        GameServer.instanceOf().setVotesCounter();
+        GameServer.instanceOf().addTotalVotes();
         gameServer.checkPolls(votedPlayer, username);
 
     }

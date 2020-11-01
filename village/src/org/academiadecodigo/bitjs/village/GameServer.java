@@ -20,7 +20,9 @@ public class GameServer {
 
     private static GameServer gameServer;
     public final int PORT = 7057;
+
     public final int N_PLAYERS = 4;
+
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private List<Character> charactersList;
@@ -30,13 +32,13 @@ public class GameServer {
     private List<Dispatcher> dispatchersList;
     private int startCounter;
     private boolean full;
+    private int votersReady;
     private int charactersAttributed;
     private String playerToSave;
     private String playerToKill;
     private int totalVotes;
+    private boolean votingStarted = false;
     private boolean votingEnded = false;
-    private int votesCounter;
-    private int playCounter;
     private int usernamesAttributed;
     private int playersWhoLeftNight;
     private boolean allLeftNight = false;
@@ -261,8 +263,10 @@ public class GameServer {
 
         for (Dispatcher dispatcher : dispatchersList) {
             if (dispatcher.getCharacter() instanceof Werewolf) {
+
                 if(dispatchersList.size()<=2){
                     player.sendUser(StringHelper.WOLFWON);
+
                     return answer;
                 }
                 return false;
@@ -275,7 +279,7 @@ public class GameServer {
 
     public synchronized void checkPolls(String vote, String voter) {
         broadcast(voter + "voted in " + vote);
-        totalVotes++;
+
         for (Dispatcher dispatcher : dispatchersList) {
             if (vote.equals(dispatcher.toString())) {
                 dispatcher.setVotes(dispatcher.getVotes() + 1);
@@ -292,7 +296,7 @@ public class GameServer {
                     broadcast(dispatcher.toString() + "was lynched. His role was a " +
                             dispatcher.getCharacter().toString());
                     votingEnded = true;
-                    resetVotesCounter();
+                    resetTotalVotes();
                     break;
                 }
 
@@ -300,7 +304,7 @@ public class GameServer {
             if (!votingEnded) {
                 broadcast(StringHelper.VOTINGINC);
                 votingEnded = true;
-                resetVotesCounter();
+                resetTotalVotes();
             }
             for (Dispatcher dispatcher : dispatchersList) {
                 dispatcher.setVotes(0);
@@ -316,12 +320,8 @@ public class GameServer {
     }
 
 
-    public void resetVotesCounter() {
-        this.votesCounter = 0;
-    }
-
-    public void setVotesCounter() {
-        this.votesCounter++;
+    public void addTotalVotes(){
+        this.totalVotes++;
     }
 
     public void addUsernamesAttributed() {
@@ -350,6 +350,28 @@ public class GameServer {
 
     public void resetVotingEnded() {
         votingEnded = false;
+    }
+
+    public void addVotersReady() {
+        this.votersReady++;
+    }
+    public void resetTotalVotes(){
+        this.totalVotes = 0;
+    }
+
+    public void resetVotingStarted() {
+        this.votingStarted = false;
+    }
+
+    public boolean isVotingStarted() {
+        return votingStarted;
+    }
+
+    public void checkVotingStarted() {
+        if (votersReady == dispatchersList.size()) {
+            votersReady=0;
+            votingStarted=true;
+        }
     }
 }
 
