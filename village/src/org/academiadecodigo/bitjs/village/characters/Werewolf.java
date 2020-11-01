@@ -32,5 +32,8 @@ public class Werewolf extends Character {
         GameServer.instanceOf().tryToKillPlayer(player);
     }
 
-
+    @Override
+    public String toString() {
+        return "Werewolf";
+    }
 }

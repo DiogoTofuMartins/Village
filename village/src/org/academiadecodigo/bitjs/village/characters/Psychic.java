@@ -28,8 +28,15 @@ public class Psychic extends Character {
 
         int response = prompt.getUserInput(menuPsychic);
 
-
         String player = excludeUser[response - 1];
+
+        if (GameServer.instanceOf().guessPlayer(player)){
+
+            prompt.sendUserMsg("YOU FOUND THE WEREWOLF!");
+        }
+
+        prompt.sendUserMsg("YOUR GUESS WAS WRONG!");
+
 
         GameServer.instanceOf().tryToKillPlayer(player);
 

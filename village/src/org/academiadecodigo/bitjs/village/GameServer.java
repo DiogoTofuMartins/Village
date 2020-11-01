@@ -2,6 +2,7 @@ package org.academiadecodigo.bitjs.village;
 
 import org.academiadecodigo.bitjs.village.characters.Character;
 import org.academiadecodigo.bitjs.village.characters.CharacterFactory;
+import org.academiadecodigo.bitjs.village.characters.Werewolf;
 import org.academiadecodigo.bootcamp.Prompt;
 
 import javax.xml.stream.events.Characters;
@@ -179,6 +180,18 @@ public class GameServer {
         }
         notifyAll();
 
+    }
+
+    public synchronized boolean guessPlayer(String player) {
+
+        for (Dispatcher username : dispatchersList) {
+
+            if (player.equals(username.toString()) && username.getCharacter()instanceof Werewolf) {
+                return true;
+            }
+        }
+        notifyAll();
+        return false;
     }
 
     public synchronized void tryToKillPlayer(String player) {
