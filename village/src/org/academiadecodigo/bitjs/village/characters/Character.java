@@ -3,6 +3,7 @@ package org.academiadecodigo.bitjs.village.characters;
 import org.academiadecodigo.bitjs.village.DayChatCommands;
 import org.academiadecodigo.bitjs.village.Dispatcher;
 import org.academiadecodigo.bitjs.village.GameServer;
+import org.academiadecodigo.bitjs.village.utili.StringHelper;
 import org.academiadecodigo.bootcamp.Prompt;
 import org.academiadecodigo.bootcamp.scanners.menu.MenuInputScanner;
 
@@ -14,7 +15,7 @@ public class Character {
     }
 
     public void runDayLogic(Prompt prompt, Dispatcher userDispatcher) {
-
+        prompt.sendUserMsg(StringHelper.DAY);
         String actualMessage;
         boolean voted = false;
         while (!userDispatcher.isDead()) {
@@ -43,16 +44,16 @@ public class Character {
 
 
                     case "/whisper":
-                        prompt.sendUserMsg("who do you want to send the secret message");
+                        prompt.sendUserMsg(StringHelper.WHISPER);
                         String user = prompt.getUserInput();
                         if (!GameServer.instanceOf().checkUsername(user)) {
-                            prompt.sendUserMsg("What is the message ?");
+                            prompt.sendUserMsg(StringHelper.MESSAGE);
                             String secretMessage = prompt.getUserInput();
                             GameServer.instanceOf().whisper(user, userDispatcher.toString(), secretMessage);
                             break;
 
                         }
-                        prompt.sendUserMsg("that user does not exist");
+                        prompt.sendUserMsg(StringHelper.USER);
                         break;
 
                     case "/vote":
@@ -77,7 +78,7 @@ public class Character {
     public void runVotingLogic(GameServer gameServer, String username, Prompt prompt) {
 
         MenuInputScanner voteMenu = new MenuInputScanner(gameServer.listUsers());
-        voteMenu.setMessage("who do you want to linch ?");
+        voteMenu.setMessage(StringHelper.VOTING);
         int voteIndex = prompt.getUserInput(voteMenu) - 1;
         String votedPlayer = gameServer.listUsers()[voteIndex];
         GameServer.instanceOf().setVotesCounter();

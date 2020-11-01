@@ -3,6 +3,7 @@ package org.academiadecodigo.bitjs.village.characters;
 
 import org.academiadecodigo.bitjs.village.Dispatcher;
 import org.academiadecodigo.bitjs.village.GameServer;
+import org.academiadecodigo.bitjs.village.utili.StringHelper;
 import org.academiadecodigo.bootcamp.Prompt;
 import org.academiadecodigo.bootcamp.scanners.menu.MenuInputScanner;
 
@@ -23,7 +24,7 @@ public class Werewolf extends Character {
 
         }
         MenuInputScanner menuWerewolf = new MenuInputScanner(excludeUser);
-        menuWerewolf.setMessage("Who do you want to kill?");
+        menuWerewolf.setMessage(StringHelper.KILL);
 
         int response = prompt.getUserInput(menuWerewolf);
 
@@ -34,6 +35,6 @@ public class Werewolf extends Character {
 
     @Override
     public String toString() {
-        return "Werewolf";
+        return StringHelper.WEREWOLF;
     }
 }

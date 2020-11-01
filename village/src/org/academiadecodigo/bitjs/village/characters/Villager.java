@@ -1,6 +1,7 @@
 package org.academiadecodigo.bitjs.village.characters;
 import org.academiadecodigo.bitjs.village.Dispatcher;
 import org.academiadecodigo.bitjs.village.GameServer;
+import org.academiadecodigo.bitjs.village.utili.StringHelper;
 import org.academiadecodigo.bootcamp.Prompt;
 
 public class Villager extends Character{
@@ -9,8 +10,8 @@ public class Villager extends Character{
     @Override
     public void runNightLogic(Prompt prompt, Dispatcher dispatcher) {
 
-        prompt.sendUserMsg("What a beautiful night. I should get some sleep.");
-        prompt.sendUserMsg("Press enter to skip night.");
+        prompt.sendUserMsg(StringHelper.VILLAGERPHRASE);
+        prompt.sendUserMsg(StringHelper.ENTER);
         prompt.getUserInput();
         return;
 
@@ -19,6 +20,6 @@ public class Villager extends Character{
 
     @Override
     public String toString() {
-        return "Villager";
+        return StringHelper.VILLAGER;
     }
 }

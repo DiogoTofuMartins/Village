@@ -3,6 +3,7 @@ package org.academiadecodigo.bitjs.village;
 import org.academiadecodigo.bitjs.village.characters.Character;
 import org.academiadecodigo.bitjs.village.characters.CharacterFactory;
 import org.academiadecodigo.bitjs.village.characters.Werewolf;
+import org.academiadecodigo.bitjs.village.utili.StringHelper;
 import org.academiadecodigo.bootcamp.Prompt;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ public class GameServer {
 
     private static GameServer gameServer;
     public final int PORT = 7057;
-    public final int N_PLAYERS = 5;
+    public final int N_PLAYERS = 4;
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private List<Character> charactersList;
@@ -83,7 +84,7 @@ public class GameServer {
 
             prompt = new Prompt(clientSocket.getInputStream(), new PrintStream(clientSocket.getOutputStream()));
             if (full) {
-                prompt.sendUserMsg("game full, try again later!");
+                prompt.sendUserMsg(StringHelper.GAMEFULL);
                 clientSocket.close();
                 return;
             }
@@ -94,7 +95,7 @@ public class GameServer {
             dispatchersList.add(dispatcher);
             executorService.submit(dispatcher);
             System.out.println(dispatchersList.size());
-            prompt.sendUserMsg("waiting for players, please stand by...");
+            prompt.sendUserMsg(StringHelper.WAITING);
 
             if (startCounter == N_PLAYERS) {
                 charactersList = CharacterFactory.getList(startCounter);
@@ -243,15 +244,15 @@ public class GameServer {
             for (Dispatcher dispatcher : dispatchersList) {
                 if (dispatcher.toString().equals(playerToKill)) {
                     dispatcher.setDead();
-                    dispatcher.sendUser("YOU ARE DEAD. Go drink a coffee.");
+                    dispatcher.sendUser(StringHelper.DEAD);
                     dispatchersList.remove(dispatcher);
                     broadcast(dispatcher.toString() + " was killed by the wolf \n"
-                            + dispatcher.toString() + "'s role was a " + dispatcher.getCharacter().toString());
+                            + dispatcher.toString() + "is role was a " + dispatcher.getCharacter().toString());
                     return;
                 }
             }
         }
-        broadcast("TODAY WAS A GOOD DAY, NOBODY DIED.\n");
+        broadcast(StringHelper.GOODDAY);
 
     }
 
@@ -261,14 +262,14 @@ public class GameServer {
         for (Dispatcher dispatcher : dispatchersList) {
             if (dispatcher.getCharacter() instanceof Werewolf) {
                 if(dispatchersList.size()<=2){
-                    player.sendUser("The wolf has won game ended");
+                    player.sendUser(StringHelper.WOLFWON);
                     return answer;
                 }
                 return false;
 
             }
         }
-        player.sendUser("The wolf was slayed, the village is safe");
+        player.sendUser(StringHelper.VILLAGEWON);
         return answer;
     }
 
@@ -287,7 +288,7 @@ public class GameServer {
                 if (dispatcher.getVotes() >= (dispatchersList.size() / 2)) {
                     dispatcher.setDead();
                     dispatchersList.remove(dispatcher);
-                    dispatcher.sendUser("YOU ARE DEAD. Go drink a coffee.");
+                    dispatcher.sendUser(StringHelper.DEAD);
                     broadcast(dispatcher.toString() + "was lynched. His role was a " +
                             dispatcher.getCharacter().toString());
                     votingEnded = true;
@@ -297,7 +298,7 @@ public class GameServer {
 
             }
             if (!votingEnded) {
-                broadcast("VOTING WAS INCONCLUSIVE, NOBODY DIED\n");
+                broadcast(StringHelper.VOTINGINC);
                 votingEnded = true;
                 resetVotesCounter();
             }

@@ -1,6 +1,7 @@
 package org.academiadecodigo.bitjs.village.characters;
 import org.academiadecodigo.bitjs.village.Dispatcher;
 import org.academiadecodigo.bitjs.village.GameServer;
+import org.academiadecodigo.bitjs.village.utili.StringHelper;
 import org.academiadecodigo.bootcamp.Prompt;
 import org.academiadecodigo.bootcamp.scanners.menu.MenuInputScanner;
 
@@ -11,7 +12,7 @@ public class Priest extends Character{
     public void runNightLogic(Prompt prompt, Dispatcher dispatcher) {
 
         MenuInputScanner menuPriest = new MenuInputScanner(GameServer.instanceOf().listUsers());
-        menuPriest.setMessage("Who do you want to save?");
+        menuPriest.setMessage(StringHelper.PRIESTPHRASE);
 
         int response = prompt.getUserInput(menuPriest);
 
@@ -23,6 +24,6 @@ public class Priest extends Character{
 
     @Override
     public String toString() {
-        return "Priest";
+        return StringHelper.PRIEST;
     }
 }

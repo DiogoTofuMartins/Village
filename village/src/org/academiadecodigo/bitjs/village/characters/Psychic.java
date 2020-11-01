@@ -4,6 +4,7 @@ package org.academiadecodigo.bitjs.village.characters;
 import org.academiadecodigo.bitjs.village.Dispatcher;
 
 import org.academiadecodigo.bitjs.village.GameServer;
+import org.academiadecodigo.bitjs.village.utili.StringHelper;
 import org.academiadecodigo.bootcamp.Prompt;
 import org.academiadecodigo.bootcamp.scanners.menu.MenuInputScanner;
 
@@ -24,7 +25,7 @@ public class Psychic extends Character {
 
         }
         MenuInputScanner menuPsychic = new MenuInputScanner(excludeUser);
-        menuPsychic.setMessage("Do you have an esoteric perception of anyone?");
+        menuPsychic.setMessage(StringHelper.PSYCHICPHRASE);
 
         int response = prompt.getUserInput(menuPsychic);
 
@@ -32,10 +33,10 @@ public class Psychic extends Character {
 
         if (GameServer.instanceOf().guessPlayer(player)){
 
-            prompt.sendUserMsg("YOU FOUND THE WEREWOLF!");
+            prompt.sendUserMsg(StringHelper.GUESSRIGHT);
 
 
-        }else {prompt.sendUserMsg("YOUR GUESS WAS WRONG!");}
+        }else {prompt.sendUserMsg(StringHelper.GUESSWRONG);}
 
 
 
@@ -46,6 +47,6 @@ public class Psychic extends Character {
 
     @Override
     public String toString() {
-        return "Psychic";
+        return StringHelper.PSYCHIC;
     }
 }

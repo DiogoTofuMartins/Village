@@ -1,6 +1,7 @@
 package org.academiadecodigo.bitjs.village;
 
 import org.academiadecodigo.bitjs.village.characters.Character;
+import org.academiadecodigo.bitjs.village.utili.StringHelper;
 import org.academiadecodigo.bootcamp.Prompt;
 import org.academiadecodigo.bootcamp.scanners.string.StringInputScanner;
 
@@ -65,7 +66,7 @@ public class Dispatcher implements Runnable {
         System.out.println(Thread.currentThread().getName());
 
         while (!isDead()) {
-            prompt.sendUserMsg("THE SUN HAS SET");
+            prompt.sendUserMsg(StringHelper.NIGHT);
             character.runNightLogic(prompt, this);
             GameServer.instanceOf().addPlayersWhoLeftNight();
             while(!GameServer.instanceOf().didAllLeftNightLogic()){
@@ -86,7 +87,7 @@ public class Dispatcher implements Runnable {
             if (isDead()) {
                 break;
             }
-            prompt.sendUserMsg("THE SUN HAS RISEN.");
+            prompt.sendUserMsg(StringHelper.SUNSET);
             character.runDayLogic(prompt, this);
 
             GameServer.instanceOf().resetAllLeftNight();
@@ -118,6 +119,8 @@ public class Dispatcher implements Runnable {
     public void enterLobbyChat() {
 
         System.out.println("entered lobby chat");
+        prompt.sendUserMsg(StringHelper.LOGO);
+        prompt.sendUserMsg(StringHelper.INSTRUCTIONS);
         String actualMessage=null;
 
         boolean isCommand = false;
@@ -147,23 +150,23 @@ public class Dispatcher implements Runnable {
 
 
                     case "/whisper":
-                        prompt.sendUserMsg("who do you want to send the secret message");
+                        prompt.sendUserMsg(StringHelper.WHISPER);
                         String user = prompt.getUserInput();
                         if (!GameServer.instanceOf().checkUsername(user)) {
-                            prompt.sendUserMsg("What is the message ?");
+                            prompt.sendUserMsg(StringHelper.MESSAGE);
                             String secretMessage = prompt.getUserInput();
                             GameServer.instanceOf().whisper(user, userName, secretMessage);
                             notifyAll();
                             break;
 
                         }
-                        sendUser("that user does not exist");
+                        sendUser(StringHelper.USER);
                         break;
 
                     case "/play":
                         System.out.println(GameServer.instanceOf().getStartCounter());
-                        if (GameServer.instanceOf().getStartCounter() == 5) {
-                            GameServer.instanceOf().broadcast(userName + " is ready to play", this);
+                        if (GameServer.instanceOf().getStartCounter() == 4) {
+                            GameServer.instanceOf().broadcast(userName + " is ready to play!", this);
                             GameServer.instanceOf().attributeMyCharacter(this);
 
                             isCommand=false;
@@ -202,7 +205,7 @@ public class Dispatcher implements Runnable {
 
     public void setCharacter(Character character) {
         this.character = character;
-        prompt.sendUserMsg("you are a" + character.toString());
+        prompt.sendUserMsg(character.toString());
 
     }
 
