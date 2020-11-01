@@ -30,27 +30,36 @@ public class GameServer {
     private String playerToSave;
     private String playerToKill;
     private int totalVotes;
+    private static GameServer gameServer;
 
 
-    public GameServer() {
+    private GameServer() {
         try {
             this.serverSocket = new ServerSocket(PORT);
             characterAttributed = false;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.executorService = Executors.newCachedThreadPool();
+        this.executorService = Executors.newFixedThreadPool(10);
 
         dispatchersList = Collections.synchronizedList(new LinkedList<>());
 
     }
 
+    public static GameServer instanceOf(){
+        if(gameServer == null){
+            gameServer = new GameServer();
+            return gameServer;
+        }
+        return gameServer;
+    }
+
     public static void main(String[] args) {
-        GameServer chat = new GameServer();
 
-        while (chat.serverSocket.isBound()) {
 
-            chat.init();
+        while (GameServer.instanceOf().serverSocket.isBound()) {
+
+            GameServer.instanceOf().init();
         }
     }
 
@@ -69,13 +78,15 @@ public class GameServer {
                 return;
             }
             counter++;
-            prompt.sendUserMsg("waiting for players, please stand by...");
 
-            Dispatcher dispatcher = new Dispatcher(clientSocket, this);
+
+            Dispatcher dispatcher = new Dispatcher(clientSocket);
             dispatchersList.add(dispatcher);
             executorService.submit(dispatcher);
+            System.out.println(dispatchersList.size());
+            prompt.sendUserMsg("waiting for players, please stand by...");
 
-            if (counter == 3) {
+            if (counter == 5) {
                 charactersList = CharacterFactory.getList(counter);
                 full = true;
             }
@@ -90,11 +101,13 @@ public class GameServer {
     public synchronized void broadcast(String string, Dispatcher dispatcher) {
 
         for (Dispatcher player : dispatchersList) {
+            System.out.println(dispatchersList.size());
             if (player.toString().equals(dispatcher.toString())) {
                 continue;
             }
             player.sendUser(string);
         }
+        notifyAll();
     }
     public synchronized void broadcast(String string) {
 
@@ -102,6 +115,7 @@ public class GameServer {
 
             player.sendUser(string);
         }
+        notifyAll();
     }
 
 
@@ -114,24 +128,10 @@ public class GameServer {
             playersNames[i] = dispatchersList.get(i).toString();
 
         }
-
+        notifyAll();
         return playersNames;
     }
 
-    public synchronized String[] listUsers(String userName) {
-
-        String[] playersNames = new String[dispatchersList.size() - 1];
-
-        for (int i = 0; i < dispatchersList.size(); i++) {
-            if (dispatchersList.get(i).toString().equals(userName)) {
-                continue;
-            }
-            playersNames[i] = dispatchersList.get(i).toString();
-
-        }
-
-        return playersNames;
-    }
 
     public synchronized void whisper(String username, String itself, String string) {
 
@@ -140,6 +140,7 @@ public class GameServer {
                 player.sendUser(itself + ": " + string);
             }
         }
+        notifyAll();
     }
 
     public synchronized boolean checkUsername(String userName) {
@@ -150,6 +151,7 @@ public class GameServer {
                 break;
             }
         }
+        notifyAll();
         return isValidUsername;
     }
 
@@ -160,8 +162,9 @@ public class GameServer {
         int random = (int) (Math.random() * charactersList.size());
         Character characterToReturn = charactersList.get(random);
         charactersList.remove(random);
-        characterAttributed = true;
+        //characterAttributed = true;
         dispatcher.setCharacter(characterToReturn);
+        notifyAll();
 
     }
 
@@ -174,6 +177,7 @@ public class GameServer {
             }
 
         }
+        notifyAll();
 
     }
 
@@ -186,6 +190,7 @@ public class GameServer {
             }
 
         }
+        notifyAll();
 
     }
 
@@ -216,8 +221,10 @@ public class GameServer {
                 }
 
             }
-            for (Dispatcher dispatcher : dispatchersList)
+            for (Dispatcher dispatcher : dispatchersList) {
                 dispatcher.setVotes(0);
+            }
+            notifyAll();
         }
 
         }
@@ -226,6 +233,10 @@ public class GameServer {
 
 
 
+    }
+
+    public List<Dispatcher> getDispatchersList() {
+        return dispatchersList;
     }
 
     public boolean isFull() {

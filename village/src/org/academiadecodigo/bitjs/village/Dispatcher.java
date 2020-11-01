@@ -12,17 +12,16 @@ public class Dispatcher implements Runnable {
 
     private Socket clientSocket;
     private Character character;
-    private GameServer gameServer;
     private String userName;
     private Prompt prompt;
     private int votes;
     private boolean dead;
 
 
-    public Dispatcher(Socket socket, GameServer gameServer) {
+    public Dispatcher(Socket socket) {
         this.clientSocket = socket;
 
-        this.gameServer = gameServer;
+
         try {
             this.prompt = new Prompt(socket.getInputStream(), new PrintStream(socket.getOutputStream()));
         } catch (IOException e) {
@@ -42,8 +41,7 @@ public class Dispatcher implements Runnable {
             //System.out.println("enter while");
             String triedUserName;
 
-            if (gameServer.checkUsername(triedUserName = prompt.getUserInput(usernameQuestion))) {
-                System.out.println("ekefkef");
+            if (GameServer.instanceOf().checkUsername(triedUserName = prompt.getUserInput(usernameQuestion))) {
                 userName = triedUserName;
                 prompt.sendUserMsg("i Like that Username , it is Valid \n" + "Go ahead and exchange msg with other users");
 
@@ -51,7 +49,7 @@ public class Dispatcher implements Runnable {
             }
             prompt.sendUserMsg("i don't like that Username , it is already in use pick another");
         }
-        System.out.println(Thread.currentThread().getName());
+        //System.out.println(Thread.currentThread().getName());
         enterLobbyChat();
 
     /*
@@ -65,23 +63,25 @@ public class Dispatcher implements Runnable {
             }
         }*/
         System.out.println(Thread.currentThread().getName());
+
         while (!isDead()) {
             System.out.println(Thread.currentThread().getName() + "is not dead");
-            character.runNightLogic(prompt, gameServer, this);
+            character.runNightLogic(prompt, this);
            /* synchronized (gameServer) {
                try {
                     wait();
-*/
+*/          notifyAll();
             if (isDead()) {
                 break;
             }
-            character.runDayLogic(prompt, gameServer, this);
+            character.runDayLogic(prompt, this);
                  /*  synchronized (gameServer) {
                         wait();
                     }
                 } catch(InterruptedException e){
                         e.printStackTrace();
                     }*/
+            notifyAll();
         }
     }
 
@@ -90,6 +90,7 @@ public class Dispatcher implements Runnable {
 
     public void enterLobbyChat() {
         String actualMessage;
+        System.out.println("entered lobbychat");
         while (true) {
 
 
@@ -108,17 +109,19 @@ public class Dispatcher implements Runnable {
 
 
                     case "/list":
-                        gameServer.listUsers();
+                        GameServer.instanceOf().listUsers();
+                        notifyAll();
                         break;
 
 
                     case "/whisper":
                         prompt.sendUserMsg("who do you want to send the secret message");
                         String user = prompt.getUserInput();
-                        if (!gameServer.checkUsername(user)) {
+                        if (!GameServer.instanceOf().checkUsername(user)) {
                             prompt.sendUserMsg("What is the message ?");
                             String secretMessage = prompt.getUserInput();
-                            gameServer.whisper(user, userName, secretMessage);
+                            GameServer.instanceOf().whisper(user, userName, secretMessage);
+                            notifyAll();
                             break;
 
                         }
@@ -126,18 +129,19 @@ public class Dispatcher implements Runnable {
                         break;
 
                     case "/play":
-                        gameServer.broadcast(userName + " is ready to play", this);
-                        gameServer.attributeMyCharacter(this);
-                        System.out.println(character.toString());
-                        return;
+                        GameServer.instanceOf().broadcast(userName + " is ready to play", this);
+                        GameServer.instanceOf().attributeMyCharacter(this);
+                        character.runNightLogic(prompt,this);
+                        break;
 
                     default:
                         System.out.println("this is super weird");
+                        break;
                 }
                 continue;
             }
 
-            gameServer.broadcast(actualMessage, this);
+            GameServer.instanceOf().broadcast(actualMessage, this);
 
 
         }

@@ -8,16 +8,16 @@ public class Priest extends Character{
 
 
     @Override
-    public void runNightLogic(Prompt prompt, GameServer gameServer, Dispatcher dispatcher) {
+    public void runNightLogic(Prompt prompt, Dispatcher dispatcher) {
 
-        MenuInputScanner menuPriest = new MenuInputScanner(gameServer.listUsers());
+        MenuInputScanner menuPriest = new MenuInputScanner(GameServer.instanceOf().listUsers());
         menuPriest.setMessage("Who do you want to save?");
 
         int response = prompt.getUserInput(menuPriest);
 
-        String player = gameServer.listUsers()[response - 1];
+        String player = GameServer.instanceOf().listUsers()[response - 1];
 
-        gameServer.savePlayer(player);
+        GameServer.instanceOf().savePlayer(player);
 
     }
 

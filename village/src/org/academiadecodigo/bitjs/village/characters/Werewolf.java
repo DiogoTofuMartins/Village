@@ -9,16 +9,27 @@ import org.academiadecodigo.bootcamp.scanners.menu.MenuInputScanner;
 public class Werewolf extends Character {
 
     @Override
-    public void runNightLogic(Prompt prompt, GameServer gameServer, Dispatcher dispatcher) {
+    public void runNightLogic(Prompt prompt, Dispatcher dispatcher) {
 
-        MenuInputScanner menuWerewolf = new MenuInputScanner(gameServer.listUsers(dispatcher.toString()));
+        String[] names = GameServer.instanceOf().listUsers();
+        String[] excludeUser = new String[names.length - 1];
+        int j = 0;
+
+        for (int i = 0; i < names.length; i++) {
+            if (!names[i].equals(dispatcher.toString())) {
+                excludeUser[j] = names[i];
+                j++;
+            }
+
+        }
+        MenuInputScanner menuWerewolf = new MenuInputScanner(excludeUser);
         menuWerewolf.setMessage("Who do you want to kill?");
 
         int response = prompt.getUserInput(menuWerewolf);
 
-        String player = gameServer.listUsers(dispatcher.toString())[response - 1];
+        String player = GameServer.instanceOf().listUsers(dispatcher.toString())[response - 1];
 
-        gameServer.tryToKillPlayer(player);
+        GameServer.instanceOf().tryToKillPlayer(player);
     }
 
 

@@ -9,12 +9,13 @@ import org.academiadecodigo.bootcamp.scanners.menu.MenuInputScanner;
 
 public class Character {
 
-    public void runNightLogic(Prompt prompt, GameServer gameServer, Dispatcher dispatcher){
+    public void runNightLogic(Prompt prompt, Dispatcher dispatcher){
+
 
     }
 
-    public void runDayLogic( Prompt prompt, GameServer gameServer,Dispatcher userDispatcher){
-        System.out.println("Day");
+    public void runDayLogic( Prompt prompt,Dispatcher userDispatcher){
+
         String actualMessage;
         boolean voted= false;
         while (true) {
@@ -35,17 +36,17 @@ public class Character {
 
 
                         case "/list":
-                            gameServer.listUsers();
+                            GameServer.instanceOf().listUsers();
                             break;
 
 
                         case "/whisper":
                             prompt.sendUserMsg("who do you want to send the secret message");
                             String user = prompt.getUserInput();
-                            if (!gameServer.checkUsername(user)){
+                            if (!GameServer.instanceOf().checkUsername(user)){
                                 prompt.sendUserMsg("What is the message ?");
                                 String secretMessage = prompt.getUserInput();
-                                gameServer.whisper(user , userDispatcher.toString() , secretMessage);
+                                GameServer.instanceOf().whisper(user , userDispatcher.toString() , secretMessage);
                                 break;
 
                             }
@@ -56,14 +57,14 @@ public class Character {
                             System.out.println(voted);
                             if (!voted) {
                                 voted = true;
-                                System.out.println("fed");
-                                runVotingLogic(gameServer, userDispatcher.toString(), prompt);
+
+                                runVotingLogic(GameServer.instanceOf(), userDispatcher.toString(), prompt);
                             }
                             break;
 
                         case "/sleep":
                             if (voted){
-                                gameServer.addSleeper();
+                                GameServer.instanceOf().addSleeper();
                                 return;
                             }
                             prompt.sendUserMsg("You must vote before you sleep");
@@ -74,7 +75,7 @@ public class Character {
                     continue;
                 }
 
-                gameServer.broadcast(actualMessage, userDispatcher);
+                GameServer.instanceOf().broadcast(actualMessage, userDispatcher);
 
 
             }

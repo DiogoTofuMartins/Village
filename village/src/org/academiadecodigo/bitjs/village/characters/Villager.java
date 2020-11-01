@@ -7,7 +7,7 @@ public class Villager extends Character{
 
 
     @Override
-    public void runNightLogic(Prompt prompt, GameServer gameServer, Dispatcher dispatcher) {
+    public void runNightLogic(Prompt prompt, Dispatcher dispatcher) {
 
         prompt.sendUserMsg("What a beautiful night. I should get some sleep.");
 
