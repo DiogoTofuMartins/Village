@@ -19,7 +19,7 @@ public class GameServer {
 
     private static GameServer gameServer;
     public final int PORT = 7057;
-    public final int N_PLAYERS = 8;
+    public final int N_PLAYERS = 3;
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private List<Character> charactersList;

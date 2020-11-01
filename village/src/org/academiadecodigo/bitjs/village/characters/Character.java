@@ -14,6 +14,13 @@ public class Character {
     }
 
     public void runDayLogic(Prompt prompt, Dispatcher userDispatcher) {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        prompt.sendUserMsg("\033[H\033[2J");
+        prompt.sendUserMsg("THE SUN HAS RISEN.");
 
         String actualMessage;
         boolean voted = false;
@@ -38,11 +45,16 @@ public class Character {
 
 
                     case "/list":
-                        GameServer.instanceOf().listUsers();
+                        String list = "";
+                        for(String name : GameServer.instanceOf().listUsers()){
+                            list += name + "\n";
+                        }
+                        prompt.sendUserMsg(list);
                         break;
 
 
                     case "/whisper":
+
                         prompt.sendUserMsg("who do you want to send the secret message");
                         String user = prompt.getUserInput();
                         if (!GameServer.instanceOf().checkUsername(user)) {
@@ -56,6 +68,7 @@ public class Character {
                         break;
 
                     case "/vote":
+                        prompt.sendUserMsg("\033[H\033[2J");
                         GameServer.instanceOf().addVotersReady();
                         GameServer.instanceOf().broadcast(userDispatcher.toString()+ " is ready to vote hurry up");
                         while (!GameServer.instanceOf().isVotingStarted()){
@@ -80,8 +93,19 @@ public class Character {
 
 
     public void runVotingLogic(GameServer gameServer, String username, Prompt prompt) {
+        String[] names = GameServer.instanceOf().listUsers();
+        String[] excludeUser = new String[names.length - 1];
+        int j = 0;
 
-        MenuInputScanner voteMenu = new MenuInputScanner(gameServer.listUsers());
+        for (int i = 0; i < names.length; i++) {
+            if (!names[i].equals(username)) {
+                excludeUser[j] = names[i];
+                j++;
+            }
+
+        }
+        MenuInputScanner voteMenu = new MenuInputScanner(excludeUser);
+
         voteMenu.setMessage("who do you want to linch ?");
         int voteIndex = prompt.getUserInput(voteMenu) - 1;
         String votedPlayer = gameServer.listUsers()[voteIndex];
