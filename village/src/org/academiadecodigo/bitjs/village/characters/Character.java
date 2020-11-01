@@ -56,7 +56,12 @@ public class Character {
                         break;
 
                     case "/vote":
-
+                        GameServer.instanceOf().addVotersReady();
+                        GameServer.instanceOf().broadcast(userDispatcher.toString()+ " is ready to vote hurry up");
+                        while (!GameServer.instanceOf().isVotingStarted()){
+                            GameServer.instanceOf().checkVotingStarted();
+                            userDispatcher.addDelay(100);
+                        }
                         runVotingLogic(GameServer.instanceOf(), userDispatcher.toString(), prompt);
                         return;
 
@@ -80,7 +85,7 @@ public class Character {
         voteMenu.setMessage("who do you want to linch ?");
         int voteIndex = prompt.getUserInput(voteMenu) - 1;
         String votedPlayer = gameServer.listUsers()[voteIndex];
-        GameServer.instanceOf().setVotesCounter();
+        GameServer.instanceOf().addTotalVotes();
         gameServer.checkPolls(votedPlayer, username);
 
     }

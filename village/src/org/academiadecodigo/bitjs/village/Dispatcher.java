@@ -72,7 +72,9 @@ public class Dispatcher implements Runnable {
                 GameServer.instanceOf().allLeftNightLogic();
                 addDelay(100);
             }
-            addDelay(1000);
+            GameServer.instanceOf().resetVotingStarted();
+            GameServer.instanceOf().resetVotingEnded();
+
             if(GameServer.instanceOf().checkEndGame(this)){
                 try {
                     clientSocket.close();
@@ -82,7 +84,6 @@ public class Dispatcher implements Runnable {
                 return;
             }
 
-            GameServer.instanceOf().resetVotingEnded();
             if (isDead()) {
                 break;
             }
@@ -162,7 +163,7 @@ public class Dispatcher implements Runnable {
 
                     case "/play":
                         System.out.println(GameServer.instanceOf().getStartCounter());
-                        if (GameServer.instanceOf().getStartCounter() == 5) {
+                        if (GameServer.instanceOf().getStartCounter() == GameServer.instanceOf().N_PLAYERS) {
                             GameServer.instanceOf().broadcast(userName + " is ready to play", this);
                             GameServer.instanceOf().attributeMyCharacter(this);
 
