@@ -33,15 +33,17 @@ public class Psychic extends Character {
         if (GameServer.instanceOf().guessPlayer(player)){
 
             prompt.sendUserMsg("YOU FOUND THE WEREWOLF!");
-        }
 
-        prompt.sendUserMsg("YOUR GUESS WAS WRONG!");
+        }else {prompt.sendUserMsg("YOUR GUESS WAS WRONG!");}
 
 
-        GameServer.instanceOf().tryToKillPlayer(player);
+
 
 
     }
 
-
+    @Override
+    public String toString() {
+        return "Psychic";
+    }
 }

@@ -5,7 +5,8 @@ import org.academiadecodigo.bitjs.village.characters.CharacterFactory;
 import org.academiadecodigo.bitjs.village.characters.Werewolf;
 import org.academiadecodigo.bootcamp.Prompt;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collections;
@@ -16,11 +17,12 @@ import java.util.concurrent.Executors;
 
 public class GameServer {
 
+    private static GameServer gameServer;
     public final int PORT = 7057;
+    public final int N_PLAYERS = 5;
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private List<Character> charactersList;
-
     private ExecutorService executorService;
     private Prompt prompt;
     private boolean allCharacterAttributed;
@@ -31,17 +33,19 @@ public class GameServer {
     private String playerToSave;
     private String playerToKill;
     private int totalVotes;
-    private static GameServer gameServer;
+    private boolean votingEnded = false;
     private int votesCounter;
     private int playCounter;
-
+    private int usernamesAttributed;
+    private int playersWhoLeftNight;
+    private boolean allLeftNight = false;
 
 
     private GameServer() {
         try {
             this.serverSocket = new ServerSocket(PORT);
             allCharacterAttributed = false;
-            charactersAttributed=0;
+            charactersAttributed = 0;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -91,7 +95,7 @@ public class GameServer {
             System.out.println(dispatchersList.size());
             prompt.sendUserMsg("waiting for players, please stand by...");
 
-            if (startCounter == 5) {
+            if (startCounter == N_PLAYERS) {
                 charactersList = CharacterFactory.getList(startCounter);
                 full = true;
             }
@@ -109,9 +113,9 @@ public class GameServer {
             if (player.toString().equals(dispatcher.toString())) {
                 continue;
             }
-            player.sendUser(string);
+            player.sendUser(dispatcher.toString() + ": " + string);
         }
-         notifyAll();
+        notifyAll();
     }
 
     public synchronized void broadcast(String string) {
@@ -120,7 +124,7 @@ public class GameServer {
 
             player.sendUser(string);
         }
-         notifyAll();
+        notifyAll();
     }
 
 
@@ -145,7 +149,7 @@ public class GameServer {
                 player.sendUser(itself + ": " + string);
             }
         }
-         notifyAll();
+        notifyAll();
     }
 
     public synchronized boolean checkUsername(String userName) {
@@ -156,10 +160,14 @@ public class GameServer {
                 break;
             }
         }
-          notifyAll();
+        notifyAll();
         return isValidUsername;
     }
 
+    public synchronized boolean allHaveUsername() {
+        return usernamesAttributed == N_PLAYERS;
+
+    }
 
     public synchronized void attributeMyCharacter(Dispatcher dispatcher) {
 
@@ -170,9 +178,22 @@ public class GameServer {
         charactersAttributed++;
         dispatcher.setCharacter(characterToReturn);
         notifyAll();
-        if(charactersAttributed==5){
-            allCharacterAttributed=true;
+        if (charactersAttributed == N_PLAYERS) {
+            allCharacterAttributed = true;
         }
+
+    }
+
+    public boolean allLeftNightLogic() {
+
+        if (playersWhoLeftNight == dispatchersList.size()) {
+            allLeftNight = true;
+            checkKill();
+            playersWhoLeftNight = 0;
+            return true;
+        }
+
+        return playersWhoLeftNight == dispatchersList.size();
 
     }
 
@@ -185,7 +206,7 @@ public class GameServer {
             }
 
         }
-          notifyAll();
+        notifyAll();
 
     }
 
@@ -193,7 +214,7 @@ public class GameServer {
 
         for (Dispatcher username : dispatchersList) {
 
-            if (player.equals(username.toString()) && username.getCharacter()instanceof Werewolf) {
+            if (player.equals(username.toString()) && username.getCharacter() instanceof Werewolf) {
                 return true;
             }
         }
@@ -202,11 +223,12 @@ public class GameServer {
     }
 
     public synchronized void tryToKillPlayer(String player) {
-
+        System.out.println("player to kill was " + player);
         for (Dispatcher username : dispatchersList) {
 
             if (player.equals(username.toString())) {
                 this.playerToKill = player;
+                System.out.println(playerToKill);
             }
 
         }
@@ -214,11 +236,39 @@ public class GameServer {
 
     }
 
-    public synchronized boolean checkKill() {
+    public synchronized void checkKill() {
 
-        return !playerToKill.equals(playerToSave);
+        if (!playerToKill.equals(playerToSave)) {
+            for (Dispatcher dispatcher : dispatchersList) {
+                if (dispatcher.toString().equals(playerToKill)) {
+                    dispatcher.setDead();
+                    dispatcher.sendUser("YOU ARE DEAD. Go drink a coffee.");
+                    dispatchersList.remove(dispatcher);
+                    broadcast(dispatcher.toString() + " was killed by the wolf \n"
+                            + dispatcher.toString() + "'s role was a " + dispatcher.getCharacter().toString());
+                    return;
+                }
+            }
+        }
+        broadcast("TODAY WAS A GOOD DAY, NOBODY DIED.\n");
 
+    }
 
+    public synchronized boolean checkEndGame(Dispatcher player) {
+        boolean answer = true;
+
+        for (Dispatcher dispatcher : dispatchersList) {
+            if (dispatcher.getCharacter() instanceof Werewolf) {
+                if(dispatchersList.size()<=2){
+                    player.sendUser("The wolf has won game ended");
+                    return answer;
+                }
+                return false;
+
+            }
+        }
+        player.sendUser("The wolf was slayed, the village is safe");
+        return answer;
     }
 
     public synchronized void checkPolls(String vote, String voter) {
@@ -229,19 +279,26 @@ public class GameServer {
                 dispatcher.setVotes(dispatcher.getVotes() + 1);
             }
         }
-
+        System.out.println(totalVotes);
         if (totalVotes == dispatchersList.size()) {
 
             for (Dispatcher dispatcher : dispatchersList) {
                 if (dispatcher.getVotes() >= (dispatchersList.size() / 2)) {
                     dispatcher.setDead();
                     dispatchersList.remove(dispatcher);
-
-                    broadcast(dispatcher.toString() + "was lynched. His role was " +
+                    dispatcher.sendUser("YOU ARE DEAD. Go drink a coffee.");
+                    broadcast(dispatcher.toString() + "was lynched. His role was a " +
                             dispatcher.getCharacter().toString());
+                    votingEnded = true;
+                    resetVotesCounter();
                     break;
                 }
 
+            }
+            if (!votingEnded) {
+                broadcast("VOTING WAS INCONCLUSIVE, NOBODY DIED\n");
+                votingEnded = true;
+                resetVotesCounter();
             }
             for (Dispatcher dispatcher : dispatchersList) {
                 dispatcher.setVotes(0);
@@ -251,41 +308,46 @@ public class GameServer {
 
     }
 
-    public void addSleeper() {
-
-    }
-
 
     public int getStartCounter() {
         return startCounter;
     }
 
-    public int getPlayCounter() {
-        return playCounter;
-    }
-
-    public int getVotesCounter() {
-        return votesCounter;
-    }
-
-    public void resetPlayCounter() {
-        this.playCounter = 0;
-    }
 
     public void resetVotesCounter() {
         this.votesCounter = 0;
-    }
-
-    public void setPlayCounter() {
-        this.playCounter++;
     }
 
     public void setVotesCounter() {
         this.votesCounter++;
     }
 
+    public void addUsernamesAttributed() {
+        this.usernamesAttributed++;
+    }
+
+    public void addPlayersWhoLeftNight() {
+        this.playersWhoLeftNight++;
+    }
+
     public boolean isAllCharacterAttributed() {
         return allCharacterAttributed;
+    }
+
+    public boolean didAllLeftNightLogic() {
+        return allLeftNight;
+    }
+
+    public void resetAllLeftNight() {
+        this.allLeftNight = false;
+    }
+
+    public boolean isVotingEnded() {
+        return votingEnded;
+    }
+
+    public void resetVotingEnded() {
+        votingEnded = false;
     }
 }
 

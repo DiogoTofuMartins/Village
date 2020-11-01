@@ -4,7 +4,8 @@ public enum DayChatCommands {
 
     VOTE("/vote"),
     WHISPER("/whisper"),
-    LIST("/list");
+    LIST("/list"),
+    SLEEP("/sleep");
 
     private String commandMessage;
 

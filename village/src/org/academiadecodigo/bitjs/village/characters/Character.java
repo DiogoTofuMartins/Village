@@ -1,6 +1,5 @@
 package org.academiadecodigo.bitjs.village.characters;
 
-import org.academiadecodigo.bitjs.village.CommandsLobby;
 import org.academiadecodigo.bitjs.village.DayChatCommands;
 import org.academiadecodigo.bitjs.village.Dispatcher;
 import org.academiadecodigo.bitjs.village.GameServer;
@@ -22,6 +21,9 @@ public class Character {
 
             System.out.println("getting input");
             actualMessage = prompt.getUserInput();
+            if (actualMessage.equals("")||actualMessage.equals(null)){
+                continue;
+            }
             boolean isCommand = false;
             for (int i = 0; i < DayChatCommands.values().length; i++) {
 
@@ -54,21 +56,10 @@ public class Character {
                         break;
 
                     case "/vote":
-                        System.out.println(voted);
-                        if (!voted) {
-                            voted = true;
 
-                            runVotingLogic(GameServer.instanceOf(), userDispatcher.toString(), prompt);
-                        }
-                        break;
+                        runVotingLogic(GameServer.instanceOf(), userDispatcher.toString(), prompt);
+                        return;
 
-                    case "/sleep":
-                        if (voted) {
-                            GameServer.instanceOf().addSleeper();
-                            return;
-                        }
-                        prompt.sendUserMsg("You must vote before you sleep");
-                        break;
                     default:
                         System.out.println("this is super weird");
                 }
@@ -79,7 +70,7 @@ public class Character {
 
 
         }
-        prompt.sendUserMsg("YOU ARE DEAD. Go drink a coffee.");
+
     }
 
 

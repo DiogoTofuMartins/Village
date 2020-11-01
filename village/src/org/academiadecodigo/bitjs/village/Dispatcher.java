@@ -46,12 +46,15 @@ public class Dispatcher implements Runnable {
             if (GameServer.instanceOf().checkUsername(triedUserName = prompt.getUserInput(usernameQuestion))) {
                 userName = triedUserName;
                 prompt.sendUserMsg("i Like that Username , it is Valid \n" + "Go ahead and exchange msg with other users");
-
+                GameServer.instanceOf().addUsernamesAttributed();
                 break;
             }
             prompt.sendUserMsg("i don't like that Username , it is already in use pick another");
         }
+        while (!GameServer.instanceOf().allHaveUsername()){
 
+            addDelay(100);
+        }
         enterLobbyChat();
         System.out.println("arrived waiting");
         while (!GameServer.instanceOf().isAllCharacterAttributed()) {
@@ -62,17 +65,48 @@ public class Dispatcher implements Runnable {
         System.out.println(Thread.currentThread().getName());
 
         while (!isDead()) {
-            System.out.println(Thread.currentThread().getName() + "is not dead");
+            prompt.sendUserMsg("THE SUN HAS SET");
             character.runNightLogic(prompt, this);
-            System.out.println("left night logic");
+            GameServer.instanceOf().addPlayersWhoLeftNight();
+            while(!GameServer.instanceOf().didAllLeftNightLogic()){
+                GameServer.instanceOf().allLeftNightLogic();
+                addDelay(100);
+            }
+            addDelay(1000);
+            if(GameServer.instanceOf().checkEndGame(this)){
+                try {
+                    clientSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return;
+            }
 
-
+            GameServer.instanceOf().resetVotingEnded();
             if (isDead()) {
                 break;
             }
-            System.out.println("arriving day logic");
+            prompt.sendUserMsg("THE SUN HAS RISEN.");
             character.runDayLogic(prompt, this);
 
+            GameServer.instanceOf().resetAllLeftNight();
+            while (!GameServer.instanceOf().isVotingEnded()){
+                addDelay(100);
+            }
+
+            if(GameServer.instanceOf().checkEndGame(this)){
+                try {
+                    clientSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return;
+            }
+        }
+        try {
+            clientSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
 
@@ -83,15 +117,15 @@ public class Dispatcher implements Runnable {
 
     public void enterLobbyChat() {
 
+        System.out.println("entered lobby chat");
+        String actualMessage=null;
 
-        String actualMessage;
-        System.out.println("entered lobbychat");
         boolean isCommand = false;
         while (true) {
 
 
             actualMessage = prompt.getUserInput();
-            if (actualMessage==""){
+            if (actualMessage.equals("")||actualMessage.equals(null)){
                 continue;
             }
             for (int i = 0; i < CommandsLobby.values().length; i++) {
@@ -131,7 +165,7 @@ public class Dispatcher implements Runnable {
                         if (GameServer.instanceOf().getStartCounter() == 5) {
                             GameServer.instanceOf().broadcast(userName + " is ready to play", this);
                             GameServer.instanceOf().attributeMyCharacter(this);
-                            //character.runNightLogic(prompt, this);
+
                             isCommand=false;
                             return;
                         }
@@ -144,6 +178,7 @@ public class Dispatcher implements Runnable {
                 isCommand= false;
                 continue;
             }
+
 
             GameServer.instanceOf().broadcast(actualMessage, this);
 
@@ -167,7 +202,7 @@ public class Dispatcher implements Runnable {
 
     public void setCharacter(Character character) {
         this.character = character;
-        prompt.sendUserMsg("you are " + character.toString());
+        prompt.sendUserMsg("you are a" + character.toString());
 
     }
 
@@ -196,5 +231,6 @@ public class Dispatcher implements Runnable {
     public Character getCharacter() {
         return character;
     }
+
 }
 

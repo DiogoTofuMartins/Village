@@ -10,10 +10,15 @@ public class Villager extends Character{
     public void runNightLogic(Prompt prompt, Dispatcher dispatcher) {
 
         prompt.sendUserMsg("What a beautiful night. I should get some sleep.");
+        prompt.sendUserMsg("Press enter to skip night.");
+        prompt.getUserInput();
         return;
 
 
     }
 
-
+    @Override
+    public String toString() {
+        return "Villager";
+    }
 }

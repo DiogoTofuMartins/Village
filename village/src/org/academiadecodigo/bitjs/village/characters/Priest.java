@@ -21,5 +21,8 @@ public class Priest extends Character{
 
     }
 
-
+    @Override
+    public String toString() {
+        return "Priest";
+    }
 }
