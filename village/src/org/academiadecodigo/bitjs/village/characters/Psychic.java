@@ -33,14 +33,10 @@ public class Psychic extends Character {
         if (GameServer.instanceOf().guessPlayer(player)){
 
             prompt.sendUserMsg("YOU FOUND THE WEREWOLF!");
+        }else{
+            prompt.sendUserMsg("YOUR GUESS WAS WRONG!");
         }
-
-        prompt.sendUserMsg("YOUR GUESS WAS WRONG!");
-
-
         GameServer.instanceOf().tryToKillPlayer(player);
-
-
     }
 
 
