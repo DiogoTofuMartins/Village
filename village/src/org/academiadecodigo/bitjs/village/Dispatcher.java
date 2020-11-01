@@ -18,8 +18,10 @@ public class Dispatcher implements Runnable {
     private boolean dead;
 
 
+
     public Dispatcher(Socket socket) {
         this.clientSocket = socket;
+
 
 
         try {
@@ -38,7 +40,7 @@ public class Dispatcher implements Runnable {
 
 
         while (userName == null) {
-            //System.out.println("enter while");
+
             String triedUserName;
 
             if (GameServer.instanceOf().checkUsername(triedUserName = prompt.getUserInput(usernameQuestion))) {
@@ -49,56 +51,49 @@ public class Dispatcher implements Runnable {
             }
             prompt.sendUserMsg("i don't like that Username , it is already in use pick another");
         }
-        //System.out.println(Thread.currentThread().getName());
+
         enterLobbyChat();
+        System.out.println("arrived waiting");
+        while (!GameServer.instanceOf().isAllCharacterAttributed()) {
 
-    /*
-            synchronized (gameServer) {
+            addDelay(100);
+        }
 
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }*/
         System.out.println(Thread.currentThread().getName());
 
         while (!isDead()) {
             System.out.println(Thread.currentThread().getName() + "is not dead");
             character.runNightLogic(prompt, this);
             System.out.println("left night logic");
-           /* synchronized (gameServer) {
-               try {
-                    wait();
-*/
+
 
             if (isDead()) {
                 break;
             }
             System.out.println("arriving day logic");
             character.runDayLogic(prompt, this);
-                 /*  synchronized (gameServer) {
-                        wait();
-                    }
-                } catch(InterruptedException e){
-                        e.printStackTrace();
-                    }*/
 
         }
+
+
     }
 
 
     //TODO Use StringHelper in all hardcoded strings
 
     public void enterLobbyChat() {
+
+
         String actualMessage;
         System.out.println("entered lobbychat");
+        boolean isCommand = false;
         while (true) {
 
 
             actualMessage = prompt.getUserInput();
-            boolean isCommand = false;
+            if (actualMessage==""){
+                continue;
+            }
             for (int i = 0; i < CommandsLobby.values().length; i++) {
 
                 if (actualMessage.equals(CommandsLobby.values()[i].getCommandMessage())) {
@@ -132,10 +127,12 @@ public class Dispatcher implements Runnable {
                         break;
 
                     case "/play":
-                        if(GameServer.instanceOf().getCounter() == 5) {
+                        System.out.println(GameServer.instanceOf().getStartCounter());
+                        if (GameServer.instanceOf().getStartCounter() == 5) {
                             GameServer.instanceOf().broadcast(userName + " is ready to play", this);
                             GameServer.instanceOf().attributeMyCharacter(this);
                             //character.runNightLogic(prompt, this);
+                            isCommand=false;
                             return;
                         }
                         break;
@@ -144,6 +141,7 @@ public class Dispatcher implements Runnable {
                         System.out.println("this is super weird");
                         break;
                 }
+                isCommand= false;
                 continue;
             }
 
@@ -151,9 +149,17 @@ public class Dispatcher implements Runnable {
 
 
         }
-
     }
 
+
+    public void addDelay(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
 
     public void sendUser(String message) {
         prompt.sendUserMsg(message);
