@@ -89,6 +89,7 @@ public class Character {
         voteMenu.setMessage("who do you want to linch ?");
         int voteIndex = prompt.getUserInput(voteMenu) - 1;
         String votedPlayer = gameServer.listUsers()[voteIndex];
+        GameServer.instanceOf().setVotesCounter();
         gameServer.checkPolls(votedPlayer, username);
 
     }
