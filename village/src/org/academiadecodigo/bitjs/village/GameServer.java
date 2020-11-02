@@ -68,6 +68,8 @@ public class GameServer {
 
     public static void main(String[] args) {
 
+        System.out.println((int) Math.ceil(5 / 2));
+
         while (GameServer.instanceOf().serverSocket.isBound()) {
 
             GameServer.instanceOf().init();
@@ -286,9 +288,14 @@ public class GameServer {
 
         if (totalVotes == dispatchersList.size()) {
 
+            int oddSize = dispatchersList.size();
+
             for (Dispatcher dispatcher : dispatchersList) {
 
-                if (dispatcher.getVotes() >= (dispatchersList.size() / 2)) {
+                if(oddSize % 2 != 0){
+                    oddSize++;
+                }
+                if ( dispatcher.getVotes() >= oddSize / 2 ) {
                     dispatcher.setDead();
                     dispatchersList.remove(dispatcher);
                     dispatcher.sendUser(StringHelper.DEAD);
